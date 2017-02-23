@@ -1,0 +1,263 @@
+\documentclass[11pt]{article}
+
+\newcommand{\cnum}{CS188}
+\newcommand{\ced}{Winter 2017}
+\newcommand{\ctitle}[3]{\title{\vspace{-0.5in}\cnum, \ced\\Problem Set #1: #2\\Due #3}}
+\usepackage{enumitem}
+\newcommand{\solution}[1]{{{\color{blue}{\bf Solution:} {#1}}}}
+\usepackage[usenames,dvipsnames,svgnames,table,hyperref]{xcolor}
+\usepackage{graphicx} %package to manage images
+\graphicspath{ {/} }
+
+\renewcommand*{\theenumi}{\alph{enumi}}
+\renewcommand*\labelenumi{(\theenumi)}
+\renewcommand*{\theenumii}{\roman{enumii}}
+\renewcommand*\labelenumii{\theenumii.}
+
+
+\begin{document}
+\ctitle{1}{}{2/2/2017}
+\author{Shannon Phu}
+\date{}
+\maketitle
+\vspace{-0.3in}
+
+\section{Problem 1}
+    \begin{enumerate}
+        \item
+            \begin{equation}
+                P(x_{i}|\Theta )=\Theta ^{x_{i}}(1-\Theta ^{x_{i}})
+            \end{equation}
+            
+            \begin{equation}
+                L(\Theta)=P(x_{1},x_{2},...,x_{N}|\Theta )=\prod\Theta ^{x_{i}}(1-\Theta ^{x_{i}})
+            \end{equation}
+            The order of the elements doesn't matter.
+        
+        \item
+            \begin{equation}
+                l(\Theta )=log(L(\Theta ))=log(\prod\Theta ^{x_{i}}(1-\Theta ^{x_{i}}))
+            \end{equation}
+            
+            Because
+            \begin{equation}
+                log(ab)=log(a)+log(b)
+            \end{equation}
+            
+            \begin{equation}
+                l(\Theta)=\sum log(\Theta ^{x_{i}}(1-\Theta ^{x_{i}}))
+            \end{equation}
+            
+            Because
+            \begin{equation}
+                log(a^{b})=blog(a0
+            \end{equation}
+            
+            \begin{equation}
+                l(\Theta)=\sum [x_{i}log(\Theta)+(1-\Theta ^{x_{i}})log(1-\Theta )))]
+            \end{equation}
+            
+            \begin{equation}
+                l(\Theta)=log(\Theta) \sum x_{i}+ log(1-\Theta ) \sum (1-x_{i})))
+            \end{equation}
+            
+            \begin{equation}
+                l(\Theta)=log(\Theta) \bar{x}N+ log(1-\Theta ) \bar{x}N
+            \end{equation}
+            
+            Finding the first and second derivatives:
+            \begin{equation}
+                \frac{dl}{d\Theta}=\frac{\bar{x}N}{\Theta }-\frac{(1-\bar{x})N}{1-\Theta}
+            \end{equation}
+            
+            \begin{equation}
+                \frac{d^{2}l}{d\Theta^{2}}=-\frac{\bar{x}N}{\Theta^{2} }+\frac{(1-\bar{x})N}{(1-\Theta)^{2}}
+            \end{equation}
+            
+            I will set the first derivative to 0 and solve for theta to find the MLE:
+            
+            \begin{equation}
+                \frac{\bar{x}N}{\Theta}=\frac{(1-\bar{x})N}{1-\Theta}
+            \end{equation}
+            
+            \begin{equation}
+                MLE=\Theta=\bar{x}
+            \end{equation}
+        
+        
+        (c)
+            \begin{figure}[h]
+                \centering
+                \includegraphics[scale=0.4]{1c}
+                \caption{Based on the peak in this graph, the probability that results in the highest likelihood is 0.6. This matches what we theoretically computed using theory, which was also 0.6.}
+            \end{figure}
+        
+        \newpage
+        \vfill
+        
+        (d)
+            \begin{figure}[h]
+            \centering
+            \includegraphics[scale=0.4]{1d_1}
+            \caption{Based on the peak in this graph, the probability that results in the highest likelihood is 0.6. This matches what we theoretically computed using theory, which was also 0.6.}
+            \end{figure}
+        
+        
+            \begin{figure}[h]
+                \centering
+                \includegraphics[scale=0.4]{1d_2}
+                \caption{Based on the peak in this graph, the probability that results in the highest likelihood is 0.6. This matches what we theoretically computed using theory, which was also 0.6.}
+            \end{figure}
+            
+             
+            \begin{figure}[h]
+                \centering
+                \includegraphics[scale=0.4]{1d_3}
+                \caption{Based on the peak in this graph, the probability that results in the highest likelihood is 0.5. This matches what we theoretically computed using theory, which was also 0.5.}
+            \end{figure}
+        
+        
+        \vfill
+        \clearpage
+    
+    \end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Problem 2}
+    \begin{enumerate}
+        \item 
+            \begin{equation}
+                2^{n-3} mistakes
+            \end{equation}
+        \item No, all splits will lead to more error than if we made a single leaf decision tree. A single split would give the result of 0 or 1 both a 50/50 chance when the actual distribution leans heavily towards resulting in 1 and only in specific cases resulting in 0.
+        \item 
+            \begin{equation}
+                H[x]=-\sum p(x=a_{k})log(p(x=a_{k}))
+            \end{equation}
+            \begin{equation}
+                = -(1-p)log(1-p)+plog(p)
+            \end{equation}
+            \begin{equation}
+                = -\frac{2^{n}-2^{n-3}}{2^{n}}log(\frac{2^{n}-2^{n-3}}{2^{n}}) - \frac{2^{n-3}}{2^{n}}log(\frac{2^{n-3}}{2^{n}})
+            \end{equation}
+            \begin{equation}
+                = -(1-2^{-3})log(1-2^{-3}) - 2^{-3}log(2^{-3})
+            \end{equation}
+            \begin{equation}
+                = 0.5436
+            \end{equation}
+        \item 
+            Split on either x\textsubscript{1}, x\textsubscript{2}, or x\textsubscript{3}. If Y = 0,
+            \begin{equation}
+                p = 0.5 * 0.5 = 0.25
+            \end{equation}
+            \begin{equation}
+                H[x]=-0.75log(0.75)-0.25log(0.25)=0.8113
+            \end{equation}
+            If Y = 1,
+            \begin{equation}
+                p = 1
+            \end{equation}
+            \begin{equation}
+                H[x]=-1log(1)-0log(0) = 0
+            \end{equation}
+            Thus the conditional entropy is:
+            \begin{equation}
+                H[Y|X]=0.5(0.8113)+0.5(0)=0.406
+            \end{equation}
+    \end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Problem 3}
+    \begin{enumerate}
+        \item 
+            We are given that we have k subsets and the ratio 
+            \begin{equation}
+                \frac{p_{k}}{p_{k}+n_{k}}
+            \end{equation}
+            is equal for all subsets.
+            To find information gain,
+            \begin{equation}
+                informationgain=H[Y]-H[Y|X]
+            \end{equation}
+            Thus for information gain to be 0, H[Y] and H[YIX] must be equal. This can be proven since 
+            \begin{equation}
+                H[Y|X]=\sum_{i=1}^{K} \frac{1}{K}H_{i}(S)
+            \end{equation}
+            where 
+            \begin{equation}
+                H_{i}[S]=-\frac{p_{k}}{p_{k}+n_{k}}log(\frac{p_{k}}{p_{k}+n_{k}})-\frac{n}{p_{k}+n_{k}}log(\frac{n}{p_{k}+n_{k}})
+            \end{equation}
+            Because
+            \begin{equation}
+                H_{1}(S)=H_{2}(S)=...=H_{K}(S)
+            \end{equation}
+            then Equation 27 means that 
+            \begin{equation}
+                H[Y|X]=H_{K}(S)=H(S)
+            \end{equation}
+            Thus because the two are equal, information gain is 0.
+    \end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Problem 4}
+    \begin{enumerate}
+    
+        \item
+            \begin{enumerate}
+                \item Pclass: upper class passengers survived at a higher frequency than lower class passengers
+                \item Sex: females were more likely to survive than men
+                \item Age: children below the age of 10 survived at a significantly higher frequency than any other age group
+                \item SibSp: having 1 sibling correlated with higher frequency of survival
+                \item Parch: smaller family sizes with 1 or 2 children had a higher frequency of survival
+                \item Fare: passengers who paid higher fare had a higher frequency of survival
+                \item Embarked: passengers who embarked at Cherbourg had a higher frequency of survival than other embarking locations
+            \end{enumerate}
+        
+        \item An error of 0.485 was exactly obtained.
+        \item Using the DecisionTreeClassifier we obtain an error of 0.014.
+        \item 
+        \begin{enumerate}
+            \item MajorityVoteClassifier
+                \begin{itemize}
+                    \item train error: 0.40377855887521963
+                    \item test error: 0.40734265734265768
+                \end{itemize}
+
+            \item RandomClassifier
+                \begin{itemize}
+                    \item train error: 0.48901581722319881
+                    \item test error: 0.48657342657342667
+                \end{itemize}
+            
+
+            \item DecisionTreeClassifier
+            \begin{itemize}
+                \item train error: 0.011528998242530775
+                \item test error: 0.2397902097902099
+            \end{itemize}
+	
+        \end{enumerate}
+        
+        \item 
+            \begin{figure}[h]
+                \centering
+                \includegraphics[scale=0.6]{4e}
+                \caption{The blue line at top represents the average RandomClassifier error and the black line below that represents the MajorityClassifier. Both these models' error isnt affected by max depth. The scatter plot underneath tells us that the best max depth for our model is at 3. We see overfitting occur as max depth is over 3 when the error starts to increase again after reaching a minimum.}
+            \end{figure}
+        
+        \newpage
+
+        \item 
+            \begin{figure}[h]
+                \centering
+                \includegraphics[scale=0.6]{4f}
+                \caption{As we have more training data, our training error should increase because our model does not generalize well enough. But with more training data, the model can form better results on our testing data thus decreasing the original testing error.}
+            \end{figure}
+        
+    \end{enumerate}
+
+\end{document}
