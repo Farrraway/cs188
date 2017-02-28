@@ -181,12 +181,12 @@ def performance(y_true, y_pred, metric="accuracy"):
         confusion = metrics.confusion_matrix(y_true, y_label)
         TN, FP    = confusion[0, 0], confusion[0, 1]
         FN, TP    = confusion[1, 0], confusion[1, 1]
-        return float(TP / (TP + FN))
+        return TP / float(TP + FN)
     elif metric == "specificity":
         confusion = metrics.confusion_matrix(y_true, y_label)
         TN, FP    = confusion[0, 0], confusion[0, 1]
         FN, TP    = confusion[1, 0], confusion[1, 1]
-        return float(TN / (TN + FP))
+        return TN / float(TN + FP)
     return 0
     ### ========== TODO : END ========== ###
 
@@ -306,7 +306,7 @@ def select_param_rbf(X, y, kf, metric="accuracy"):
                 G = g
                 max_perf = perf
 
-    print("C = " + str(c) + ", gamma = " + str(G) + ": " + str(max_perf))
+    print("C = " + str(C) + ", gamma = " + str(G) + ": " + str(max_perf))
     return G, C
     ### ========== TODO : END ========== ###
 
@@ -332,8 +332,10 @@ def performance_test(clf, X, y, metric="accuracy"):
 
     ### ========== TODO : START ========== ###
     # part 4b: return performance on test data by first computing predictions and then calling performance
-
     score = 0        
+
+
+
     return score
     ### ========== TODO : END ========== ###
 
@@ -361,8 +363,8 @@ def main() :
     test_feature = X[MAX_TRAINING_ROWS:]
     test_label = y[MAX_TRAINING_ROWS:]
     
-    y_pred = [0.9, -1.0, 1.0, 0.8]
-    y_true = [1, 1, -1, 1]
+    # y_pred = [0.9, -1.0, 1.0, 0.8]
+    # y_true = [1, 1, -1, 1]
 
     # print(performance(y_true, y_pred))
     # print(performance(y_true, y_pred, metric='f1-score'))
@@ -372,24 +374,28 @@ def main() :
     # print(performance(y_true, y_pred, metric='specificity'))
 
     # part 2b: create stratified folds (5-fold CV)
-    clf = SVC(kernel='linear', C=10**-2)
-    kf = StratifiedKFold(y, n_folds=5)
+    # clf = SVC(kernel='linear', C=10**-2)
+    kf = StratifiedKFold(train_label, n_folds=5)
     # print(cv_performance(clf, X, y, kf))
 
     # part 2d: for each metric, select optimal hyperparameter for linear-kernel SVM using CV
     metrics = ['accuracy', 'f1-score', 'auroc', 'precision', 'sensitivity', 'specificity']
-    # for m in metrics:
-        # print('Best c:    ' + str(select_param_linear(X, y, kf, metric=m)))
+    for m in metrics:
+        print('Best c:    ' + str(select_param_linear(train_feature, train_label, kf, metric=m)))
 
     # part 3c: for each metric, select optimal hyperparameter for RBF-SVM using CV
     for m in metrics:
-        print(select_param_rbf(X, y, kf, metric=m))
+        print(select_param_rbf(train_feature, train_label, kf, metric=m))
 
 
     # part 4a: train linear- and RBF-kernel SVMs with selected hyperparameters
-    
+    # lin_clf = SVC(kernel='linear', C=1)
+    # lin_clf.fit(train_feature, train_label)
+    # rbf_clf = SVC(kernel='rbf', C=100, gamma=0.001)
+    # rbf_clf.fit(train_feature, train_label)
+
     # part 4c: report performance on test data
-    
+    # performance_test(lin_clf, test_feature, test_label)
     ### ========== TODO : END ========== ###
     
     
