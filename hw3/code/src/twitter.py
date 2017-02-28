@@ -90,9 +90,16 @@ def extract_dictionary(infile):
     """
     
     word_list = {}
+    count = 0
     with open(infile, 'rU') as fid :
         ### ========== TODO : START ========== ###
         # part 1a: process each line to populate word_list
+        for line in fid:
+            unique_words = extract_words(line)
+            for word in unique_words:
+                if word not in word_list:
+                    word_list[word] = count
+                    count += 1
         pass
         ### ========== TODO : END ========== ###
 
@@ -124,6 +131,11 @@ def extract_feature_vectors(infile, word_list):
     with open(infile, 'rU') as fid :
         ### ========== TODO : START ========== ###
         # part 1b: process each line to populate feature_matrix
+        for line_num, line in enumerate(fid):
+            words = extract_words(line)
+            for word in words:
+                feature_matrix[line_num][word_list[word]] = 1
+                
         pass
         ### ========== TODO : END ========== ###
         
@@ -157,6 +169,24 @@ def performance(y_true, y_pred, metric="accuracy"):
     
     ### ========== TODO : START ========== ###
     # part 2a: compute classifier performance
+    if metric == "accuracy":
+        return metrics.accuracy_score(y_true, y_label)
+    elif metric == "f1-score":
+        return metrics.f1_score(y_true, y_label, average='binary')
+    elif metric == "auroc":
+        return metrics.roc_auc_score(y_true, y_label)
+    elif metric == "precision":
+        return metrics.precision_score(y_true, y_label, average='binary')
+    elif metric == "sensitivity":
+        confusion = metrics.confusion_matrix(y_true, y_label)
+        TN, FP    = confusion[0, 0], confusion[0, 1]
+        FN, TP    = confusion[1, 0], confusion[1, 1]
+        return float(TP / (TP + FN)) * 100
+    elif metric == "specificity":
+        confusion = metrics.confusion_matrix(y_true, y_label)
+        TN, FP    = confusion[0, 0], confusion[0, 1]
+        FN, TP    = confusion[1, 0], confusion[1, 1]
+        return float(TN / (TN + FP)) * 100
     return 0
     ### ========== TODO : END ========== ###
 
@@ -184,8 +214,17 @@ def cv_performance(clf, X, y, kf, metric="accuracy"):
     """
     
     ### ========== TODO : START ========== ###
-    # part 2b: compute average cross-validation performance    
-    return 0
+    # part 2b: compute average cross-validation performance  
+    scores = []
+    for train_index, test_index in kf:
+        # print("TRAIN:", train_index, "TEST:", test_index)
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        clf.fit(X_train, y_train)
+        y_pred = clf.decision_function(X_test)
+        scores.append(performance(y_test, y_pred, metric=metric))
+    print(scores)
+    return np.mean(scores)
     ### ========== TODO : END ========== ###
 
 
@@ -214,6 +253,7 @@ def select_param_linear(X, y, kf, metric="accuracy"):
     
     ### ========== TODO : START ========== ###
     # part 2c: select optimal hyperparameter using cross-validation
+    
     return 1.0
     ### ========== TODO : END ========== ###
 
@@ -282,6 +322,7 @@ def main() :
     
     # read the tweets and its labels   
     dictionary = extract_dictionary('../data/tweets.txt')
+    # print(dictionary)
     X = extract_feature_vectors('../data/tweets.txt', dictionary)
     y = read_vector_file('../data/labels.txt')
     
@@ -289,8 +330,26 @@ def main() :
     
     ### ========== TODO : START ========== ###
     # part 1c: split data into training (training + cross-validation) and testing set
+    MAX_TRAINING_ROWS = 560
+    train_feature = X[:MAX_TRAINING_ROWS]
+    train_label = y[:MAX_TRAINING_ROWS]
+    test_feature = X[MAX_TRAINING_ROWS:]
+    test_label = y[MAX_TRAINING_ROWS:]
     
+    y_pred = [0.9, -1.0, 1.0, 0.8]
+    y_true = [1, 1, -1, 1]
+
+    # print(performance(y_true, y_pred))
+    # print(performance(y_true, y_pred, metric='f1-score'))
+    # print(performance(y_true, y_pred, metric='auroc'))
+    # print(performance(y_true, y_pred, metric='precision'))
+    # print(performance(y_true, y_pred, metric='sensitivity'))
+    # print(performance(y_true, y_pred, metric='specificity'))
+
     # part 2b: create stratified folds (5-fold CV)
+    clf = SVC(kernel='linear', C=10**-2)
+    kf = StratifiedKFold(y, n_folds=5)
+    print(cv_performance(clf, X, y, kf))
     
     # part 2d: for each metric, select optimal hyperparameter for linear-kernel SVM using CV
     
