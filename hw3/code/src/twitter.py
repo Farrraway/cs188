@@ -332,11 +332,8 @@ def performance_test(clf, X, y, metric="accuracy"):
 
     ### ========== TODO : START ========== ###
     # part 4b: return performance on test data by first computing predictions and then calling performance
-    score = 0        
-
-
-
-    return score
+    y_pred = clf.decision_function(X)
+    return performance(y, y_pred, metric=metric)
     ### ========== TODO : END ========== ###
 
 
@@ -375,27 +372,35 @@ def main() :
 
     # part 2b: create stratified folds (5-fold CV)
     # clf = SVC(kernel='linear', C=10**-2)
-    kf = StratifiedKFold(train_label, n_folds=5)
+    # kf = StratifiedKFold(train_label, n_folds=5)
     # print(cv_performance(clf, X, y, kf))
 
     # part 2d: for each metric, select optimal hyperparameter for linear-kernel SVM using CV
     metrics = ['accuracy', 'f1-score', 'auroc', 'precision', 'sensitivity', 'specificity']
-    for m in metrics:
-        print('Best c:    ' + str(select_param_linear(train_feature, train_label, kf, metric=m)))
+    # for m in metrics:
+        # print('Best c:    ' + str(select_param_linear(train_feature, train_label, kf, metric=m)))
 
     # part 3c: for each metric, select optimal hyperparameter for RBF-SVM using CV
-    for m in metrics:
-        print(select_param_rbf(train_feature, train_label, kf, metric=m))
+    # for m in metrics:
+        # print(select_param_rbf(train_feature, train_label, kf, metric=m))
 
 
     # part 4a: train linear- and RBF-kernel SVMs with selected hyperparameters
-    # lin_clf = SVC(kernel='linear', C=1)
-    # lin_clf.fit(train_feature, train_label)
-    # rbf_clf = SVC(kernel='rbf', C=100, gamma=0.001)
-    # rbf_clf.fit(train_feature, train_label)
+    lin_clf = SVC(kernel='linear', C=10)
+    lin_clf.fit(train_feature, train_label)
+
+    rbf_clf = SVC(kernel='rbf', C=100, gamma=0.01)
+    rbf_clf.fit(train_feature, train_label)
+
 
     # part 4c: report performance on test data
-    # performance_test(lin_clf, test_feature, test_label)
+    for m in metrics:
+        score = performance_test(lin_clf, test_feature, test_label, metric=m)
+        print("Linear Metric: " + m + " | Score: " + str(score))
+
+        score = performance_test(rbf_clf, test_feature, test_label, metric=m)
+        print("RBF Metric: " + m + " | Score: " + str(score))
+    
     ### ========== TODO : END ========== ###
     
     
