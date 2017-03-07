@@ -130,7 +130,7 @@ def random_init(points, k) :
     """
     ### ========== TODO : START ========== ###
     # part 2c: implement (hint: use np.random.choice)
-    return None
+    return np.random.choice(points, k, replace=False)
     ### ========== TODO : END ========== ###
 
 
@@ -189,7 +189,43 @@ def kMeans(points, k, init='random', plot=False) :
     #       a new ClusterSet object and update the centroids.
     #   (2) Repeat until the clustering no longer changes.
     #   (3) To plot, use plot_clusters(...).
+
+    # initialize CLusterSet
     k_clusters = ClusterSet()
+    for cluster in range(k):
+        if init == 'random':
+            k_clusters.add(Cluster(random_init(points, 1)))
+        elif init == 'cheat':
+            k_clusters.add(Cluster(cheat_init(points)))
+
+    # for cluster in k_clusters.members:
+        # print(str(cluster))
+
+    for p in points:
+        dist_from_cluster = []
+        centroids = k_clusters.centroids()
+        for c in centroids:
+            print(str(c))
+        for center in centroids:
+            dist_from_cluster.append(p.distance(center))
+        
+        # print(dist_from_cluster)
+        # missing paramater in func signature?
+        # medoids = k_clusters.medoids()
+
+        # find cluster which has closest centroid from this point
+        cluster_index = np.argmin(dist_from_cluster)
+        print(str(cluster_index))
+        print('-----')
+        predicted_cluster = k_clusters.members[cluster_index]
+        # new_cluster = Cluster(predicted_cluster.points)
+        # predicted_cluster.points.append(p)
+        predicted_cluster.points = np.concatenate((predicted_cluster.points, np.array([p])))
+        # print(str(p), 'added to', str(cluster_index))
+
+    if plot is True:
+        plot_clusters(k_clusters, "Title", ClusterSet.centroids)
+
     return k_clusters
     ### ========== TODO : END ========== ###
 
@@ -214,35 +250,57 @@ def main() :
     ### ========== TODO : START ========== ###
     # part 1: explore LFW data set
     X, y = util.get_lfw_data()
-    n,d = X.shape
-    avg_face = []
-    for column_index in range(d):
-        col = X[:,column_index]
-        avg_face_attr = np.mean(col, axis=0)
-        avg_face.append(avg_face_attr)
+    # n,d = X.shape
+    # avg_face = []
+    # for column_index in range(d):
+    #     col = X[:,column_index]
+    #     avg_face_attr = np.mean(col, axis=0)
+    #     avg_face.append(avg_face_attr)
 
     # util.show_image(np.array(avg_face))
     ### ========== TODO : END ========== ###
     
     # 2b
-    U, mu = util.PCA(X)
-    n,d = U.shape
+    # U, mu = util.PCA(X)
+    # n,d = U.shape
     # plot_gallery([vec_to_image(U[:,i]) for i in xrange(12)])
     # for column_index in range(d):
     #     col = U[:,column_index]
     #     util.show_image(util.vec_to_image(col))
     
     # 2c
-    ls = [1, 10, 50, 100, 500, 1288]
-    for l in ls:
-        Z, Ul = util.apply_PCA_from_Eig(X, U, l, mu)
-        X_rec = util.reconstruct_from_PCA(Z, Ul, mu)
-        plot_gallery([vec_to_image(X_rec[:,i]) for i in xrange(12)])
+    # ls = [1, 10, 50, 100, 500, 1288]
+    # for l in ls:
+    #     Z, Ul = util.apply_PCA_from_Eig(X, U, l, mu)
+    #     X_rec = util.reconstruct_from_PCA(Z, Ul, mu)
+    #     plot_gallery(X_rec[:12])
     
+
+    # test centroid
+    # p1 = Point('1', 1, np.array([5, 4]))
+    # p2 = Point('2', 2, np.array([9, 10]))
+    # p3 = Point('3', 3, np.array([3, 9]))
+    # c = Cluster([p1, p2, p3])
+    # print(str(c))
+    # print(str(c.centroid()))
+    # end test centroid
+
     ### ========== TODO : START ========== ###
     # part 2d-2f: cluster toy dataset
-    np.random.seed(1234)
-    
+    np.random.seed(1235)
+    k = 3
+    pts_per_cluster = 20
+    for i in range(5):
+        np.random.seed(i * 1000)
+        points = generate_points_2d(pts_per_cluster * k, seed=np.random.random_integers(100000))
+        k_clusters = kMeans(points, k, plot=True)
+    # print(str(k_clusters))
+    # print('*****************************************')
+    # for cluster in k_clusters.members:
+        # print(str(cluster.centroid()))
+
+    # for cluster in k_clusters:
+    #     print(str(cluster))
     ### ========== TODO : END ========== ###
     
     

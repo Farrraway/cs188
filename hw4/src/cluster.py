@@ -53,7 +53,7 @@ class Point(object) :
         """
         Return string representation.
         """
-        return "%s : (%s, %s)" % (self.name, str(self.attrs), self.label)
+        return "%s : (%s, %s); " % (self.name, str(self.attrs), self.label)
 
 
 class Cluster(object) :
@@ -118,8 +118,10 @@ class Cluster(object) :
         for p in self.points:
             points.append(p.attrs)
         points = np.array(points)
-        n,d = self.points[0].attrs.shape
-        points = points.sum(axis=0) / n
+        n,d = points.shape
+        points = points.sum(axis=0) / float(n)
+        # print(points)
+        # print(n, d)
 
         # find most common label
         labels = []
@@ -200,7 +202,18 @@ class ClusterSet(object):
         """
         self.members = []
     
-    
+    def __str__(self) :
+        """
+        Return string representation.
+        """
+        s = ""
+        for i, cluster in enumerate(self.members):
+            s += '===========================\n'
+            s += 'Cluster #' + str(i) + ': '
+            for point in cluster.points:
+                s += str(point)
+            s += 'END Cluster #' + str(i) + '\n'
+        return s
     #============================================================
     # utilities
     #============================================================    
@@ -236,7 +249,7 @@ class ClusterSet(object):
         # part 2b: implement
         medoids = []
         for cluster in self.members:
-            medoids.append(cluster.medoid(  ))
+            medoids.append(cluster.medoid())
         return medoids
         ### ========== TODO : END ========== ###
     
