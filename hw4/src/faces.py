@@ -190,7 +190,7 @@ def kMeans(points, k, init='random', plot=False) :
     #   (2) Repeat until the clustering no longer changes.
     #   (3) To plot, use plot_clusters(...).
 
-    # initialize CLusterSet
+    # initialize ClusterSet
     k_clusters = ClusterSet()
     for cluster in range(k):
         if init == 'random':
@@ -198,33 +198,42 @@ def kMeans(points, k, init='random', plot=False) :
         elif init == 'cheat':
             k_clusters.add(Cluster(cheat_init(points)))
 
-    # for cluster in k_clusters.members:
-        # print(str(cluster))
+    centroids = k_clusters.centroids()
 
-    for p in points:
-        dist_from_cluster = []
-        centroids = k_clusters.centroids()
-        for c in centroids:
-            print(str(c))
-        for center in centroids:
-            dist_from_cluster.append(p.distance(center))
+    # Make another ClusterSet to compare with k_clusters after one iteration of kmeans
+    new_k_clusters = ClusterSet()
+
+    while not k_clusters.equivalent(new_k_clusters):  
+        updated_cluster_points = [[] for x in xrange(len(centroids))]
         
-        # print(dist_from_cluster)
-        # missing paramater in func signature?
-        # medoids = k_clusters.medoids()
+        # Set k_clusters to the result of the previous iteration of kmeans
+        k_clusters = ClusterSet()
+        for cluster in new_k_clusters.members:
+            k_clusters.add(cluster)
 
-        # find cluster which has closest centroid from this point
-        cluster_index = np.argmin(dist_from_cluster)
-        print(str(cluster_index))
-        print('-----')
-        predicted_cluster = k_clusters.members[cluster_index]
-        # new_cluster = Cluster(predicted_cluster.points)
-        # predicted_cluster.points.append(p)
-        predicted_cluster.points = np.concatenate((predicted_cluster.points, np.array([p])))
-        # print(str(p), 'added to', str(cluster_index))
+        # Reset new_k_clusters for the following iteration
+        new_k_clusters = ClusterSet()
+
+        for p in points:
+            dist_from_cluster = []
+
+            for center in centroids:
+                dist_from_cluster.append(p.distance(center))
+            
+            # missing paramater in func signature?
+            # medoids = k_clusters.medoids()
+
+            # find cluster which has closest centroid from this point
+            cluster_index = np.argmin(dist_from_cluster)
+            updated_cluster_points[cluster_index].append(p)
+
+        for i, c in enumerate(centroids):
+            new_k_clusters.add(Cluster(updated_cluster_points[i]))
+
+        centroids = new_k_clusters.centroids()
 
     if plot is True:
-        plot_clusters(k_clusters, "Title", ClusterSet.centroids)
+        plot_clusters(k_clusters, "kMeans with " + str(k) + " clusters", ClusterSet.centroids)
 
     return k_clusters
     ### ========== TODO : END ========== ###
@@ -290,7 +299,7 @@ def main() :
     np.random.seed(1235)
     k = 3
     pts_per_cluster = 20
-    for i in range(5):
+    for i in range(10):
         np.random.seed(i * 1000)
         points = generate_points_2d(pts_per_cluster * k, seed=np.random.random_integers(100000))
         k_clusters = kMeans(points, k, plot=True)
