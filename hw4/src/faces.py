@@ -98,7 +98,9 @@ def generate_points_2d(N, seed=1234) :
     np.random.seed(seed)
     
     mu = [[0,0.5], [1,1], [2,0.5]]
+    # mu = [[0.75,0.75], [1,1], [1.25,1.25]]
     sigma = [[0.1,0.1], [0.25,0.25], [0.15,0.15]]
+    # sigma = [[0.001,0.1], [0.014,0.01], [0.013,0.1]]
     
     label = 0
     points = []
@@ -130,9 +132,14 @@ def random_init(points, k) :
     """
     ### ========== TODO : START ========== ###
     # part 2c: implement (hint: use np.random.choice)
-    return np.random.choice(points, k, replace=False)
-    ### ========== TODO : END ========== ###
+    # return np.random.choice(points, k, replace=False)
+    indices = np.random.choice(len(points),k,replace=False)
+    initial_points = []
+    for index in indices:
+        initial_points.append(points[index])
+    return initial_points
 
+    ### ========== TODO : END ========== ###
 
 def cheat_init(points) :
     """
@@ -153,12 +160,80 @@ def cheat_init(points) :
     """
     ### ========== TODO : START ========== ###
     # part 2f: implement
-    initial_points = []
-    return initial_points
+    initial_points = {}
+    for p in points:
+        if p.label not in initial_points:
+            initial_points[p.label] = [p]
+        else:
+            initial_points[p.label].append(p)
+
+    result = []
+    for label in initial_points:
+        sorted_points = initial_points[label]
+        c = Cluster(sorted_points)
+        result.append(c.medoid())
+
+    return result
     ### ========== TODO : END ========== ###
 
+def kAverages(points, k, average, init='random', plot=False):
+    # initialize ClusterSet
+    k_clusters = ClusterSet()
+    if init == 'random':
+        init_pts = random_init(points, k)
+        for i_pt in init_pts:
+            k_clusters.add(Cluster([i_pt]))
+    elif init == 'cheat':
+        for m in cheat_init(points):
+            k_clusters.add(Cluster([m]))
 
-def kMeans(points, k, init='random', plot=False) :
+    averages = average(k_clusters)
+    # for c in averages:
+    #     print(str(c))
+    # Make another ClusterSet to compare with k_clusters after one iteration of kmeans
+    new_k_clusters = ClusterSet()
+
+    iteration_num = 1
+    while not k_clusters.equivalent(new_k_clusters): 
+        updated_cluster_points = [[] for x in xrange(k)]
+        
+        # Set k_clusters to the result of the previous iteration of kmeans
+        k_clusters = ClusterSet()
+        for cluster in new_k_clusters.members:
+            k_clusters.add(cluster)
+
+        # Reset new_k_clusters for the following iteration
+        new_k_clusters = ClusterSet()
+
+        for p in points:
+            dist_from_cluster = []
+
+            for center in averages:
+                dist_from_cluster.append(p.distance(center))
+
+            # find cluster which has closest centroid from this point
+            cluster_index = np.argmin(dist_from_cluster)
+            updated_cluster_points[cluster_index].append(p)
+
+        for i, c in enumerate(averages):
+            # if len(updated_cluster_points[i]) == 0:
+            #     print('empty!')
+            #     continue
+            new_k_clusters.add(Cluster(updated_cluster_points[i]))
+
+        # print(new_k_clusters)
+        averages = average(new_k_clusters)
+        # print('==========')
+        # for c in averages:
+        #     print(str(c))
+        # PLOT
+        if plot is True:
+            plot_clusters(new_k_clusters, str(average) + " iteration #" + str(iteration_num), average)
+        iteration_num += 1
+
+    return k_clusters
+
+def kMeans(points, k, init='random', plot=False):
     """
     Cluster points into k clusters using variations of k-means algorithm.
     
@@ -190,54 +265,8 @@ def kMeans(points, k, init='random', plot=False) :
     #   (2) Repeat until the clustering no longer changes.
     #   (3) To plot, use plot_clusters(...).
 
-    # initialize ClusterSet
-    k_clusters = ClusterSet()
-    for cluster in range(k):
-        if init == 'random':
-            k_clusters.add(Cluster(random_init(points, 1)))
-        elif init == 'cheat':
-            k_clusters.add(Cluster(cheat_init(points)))
-
-    centroids = k_clusters.centroids()
-
-    # Make another ClusterSet to compare with k_clusters after one iteration of kmeans
-    new_k_clusters = ClusterSet()
-
-    while not k_clusters.equivalent(new_k_clusters):  
-        updated_cluster_points = [[] for x in xrange(len(centroids))]
-        
-        # Set k_clusters to the result of the previous iteration of kmeans
-        k_clusters = ClusterSet()
-        for cluster in new_k_clusters.members:
-            k_clusters.add(cluster)
-
-        # Reset new_k_clusters for the following iteration
-        new_k_clusters = ClusterSet()
-
-        for p in points:
-            dist_from_cluster = []
-
-            for center in centroids:
-                dist_from_cluster.append(p.distance(center))
-            
-            # missing paramater in func signature?
-            # medoids = k_clusters.medoids()
-
-            # find cluster which has closest centroid from this point
-            cluster_index = np.argmin(dist_from_cluster)
-            updated_cluster_points[cluster_index].append(p)
-
-        for i, c in enumerate(centroids):
-            new_k_clusters.add(Cluster(updated_cluster_points[i]))
-
-        centroids = new_k_clusters.centroids()
-
-    if plot is True:
-        plot_clusters(k_clusters, "kMeans with " + str(k) + " clusters", ClusterSet.centroids)
-
-    return k_clusters
+    return kAverages(points, k, ClusterSet.centroids, init=init, plot=plot)
     ### ========== TODO : END ========== ###
-
 
 def kMedoids(points, k, init='random', plot=False) :
     """
@@ -246,8 +275,7 @@ def kMedoids(points, k, init='random', plot=False) :
     """
     ### ========== TODO : START ========== ###
     # part 2e: implement
-    k_clusters = ClusterSet()
-    return k_clusters
+    return kAverages(points, k, ClusterSet.medoids, init=init, plot=plot)
     ### ========== TODO : END ========== ###
 
 
@@ -296,28 +324,90 @@ def main() :
 
     ### ========== TODO : START ========== ###
     # part 2d-2f: cluster toy dataset
-    np.random.seed(1235)
-    k = 3
-    pts_per_cluster = 20
-    for i in range(10):
-        np.random.seed(i * 1000)
-        points = generate_points_2d(pts_per_cluster * k, seed=np.random.random_integers(100000))
-        k_clusters = kMeans(points, k, plot=True)
-    # print(str(k_clusters))
-    # print('*****************************************')
-    # for cluster in k_clusters.members:
-        # print(str(cluster.centroid()))
-
-    # for cluster in k_clusters:
-    #     print(str(cluster))
+    # np.random.seed(1234)
+    # k = 3
+    # pts_per_cluster = 20
+    # for i in range(1):
+    #     points = generate_points_2d(pts_per_cluster)
+    #     k_clusters = kMeans(points, k, init="cheat", plot=True)
+    #     k_clusters = kMedoids(points, k, init="cheat", plot=True)
     ### ========== TODO : END ========== ###
-    
-    
     
     ### ========== TODO : START ========== ###    
     # part 3a: cluster faces
     np.random.seed(1234)
-        
+    k = 4
+    X1, y1 = util.limit_pics(X, y, [4, 6, 13, 16], 40)
+    points = build_face_image_points(X1, y1)
+
+    # plot = {}
+    # for pt in points:
+    #     if pt.label not in plot:
+    #         plot[pt.label] = []
+    #     plot[pt.label].append(pt)
+    # clusters = ClusterSet()
+    # for l in plot:
+    #     clusters.add(Cluster(plot[l]))
+    # plot_clusters(clusters, 'orig', ClusterSet.centroids)
+
+    # Part 3a
+    # centroid_score = []
+    # medoid_score = []
+    # for i in range(10):
+    #     k_clusters = kMeans(points, k, init="random", plot=False)
+    #     centroid_score.append(k_clusters.score())
+
+    # centroid_mean = sum(centroid_score) / float(len(centroid_score))
+    # centroid_min = min(centroid_score)
+    # centroid_max = max(centroid_score)
+    # print('Centroid avg:', centroid_mean)
+    # print('Centroid min:', centroid_min)
+    # print('Centroid max:', centroid_max)
+
+    # medoid_score = []
+    # for i in range(10):
+    #     k_clusters = kMedoids(points, k, init="random", plot=False)
+    #     medoid_score.append(k_clusters.score())
+
+    # centroid_mean = sum(medoid_score) / float(len(medoid_score))
+    # centroid_min = min(medoid_score)
+    # centroid_max = max(medoid_score)
+    # print('Medoid avg:', centroid_mean)
+    # print('Medoid min:', centroid_min)
+    # print('Medoid max:', centroid_max)
+
+    # PART 3b
+    X1, y1 = util.limit_pics(X, y, [4, 13], 40)
+    U, mu = util.PCA(X1)
+    k = 2
+    ls = range(42)[1::2]
+
+    centroid_score = []
+    medoid_score = []
+
+    for l in ls:
+        Z, Ul = util.apply_PCA_from_Eig(X1, U, l, mu)
+        X_rec = util.reconstruct_from_PCA(Z, Ul, mu)
+        points = build_face_image_points(Z, y1)
+        # plot_gallery(X_rec[:12])
+
+        c = kMeans(points, k, init="cheat", plot=False)
+        centroid_score.append(c.score())
+        # k_clusters = kMedoids(points, k, init="cheat")
+        # medoid_score.append(k_clusters.score())
+
+    print('Centroid avg:')
+    print(centroid_score)
+    # print('Medoid avg:')
+    # print(medoid_score)
+
+    scatter = plt.scatter(ls, centroid_score, c='c', s=20)
+    # scatter2 = plt.scatter(ls, medoid_score, c='r', s=20)
+    plt.suptitle('Centroid', fontsize=20)
+    plt.xlabel('L', fontsize=16)
+    plt.ylabel('Score', fontsize=16)
+    plt.show()
+
     # part 3b: explore effect of lower-dimensional representations on clustering performance
     np.random.seed(1234)
     

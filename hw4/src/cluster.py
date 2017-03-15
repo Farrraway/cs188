@@ -118,10 +118,14 @@ class Cluster(object) :
         for p in self.points:
             points.append(p.attrs)
         points = np.array(points)
-        n,d = points.shape
-        points = points.sum(axis=0) / float(n)
-        # print(points)
-        # print(n, d)
+        # For generated 2-d points
+        # n,d = points.shape
+        # For images
+        # print(points.shape)
+        # n,d,p = points.shape
+        # points = points.sum(axis=0) / float(n)
+        points = points.sum(axis=0) / float(len(points))
+
 
         # find most common label
         labels = []
