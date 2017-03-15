@@ -297,7 +297,7 @@ def main() :
     # util.show_image(np.array(avg_face))
     ### ========== TODO : END ========== ###
     
-    # 2b
+    # 1b
     # U, mu = util.PCA(X)
     # n,d = U.shape
     # plot_gallery([vec_to_image(U[:,i]) for i in xrange(12)])
@@ -305,7 +305,7 @@ def main() :
     #     col = U[:,column_index]
     #     util.show_image(util.vec_to_image(col))
     
-    # 2c
+    # 1c
     # ls = [1, 10, 50, 100, 500, 1288]
     # for l in ls:
     #     Z, Ul = util.apply_PCA_from_Eig(X, U, l, mu)
@@ -393,19 +393,20 @@ def main() :
 
         c = kMeans(points, k, init="cheat", plot=False)
         centroid_score.append(c.score())
-        # k_clusters = kMedoids(points, k, init="cheat")
-        # medoid_score.append(k_clusters.score())
-
-    print('Centroid avg:')
-    print(centroid_score)
-    # print('Medoid avg:')
-    # print(medoid_score)
+        k_clusters = kMedoids(points, k, init="cheat")
+        medoid_score.append(k_clusters.score())
 
     scatter = plt.scatter(ls, centroid_score, c='c', s=20)
-    # scatter2 = plt.scatter(ls, medoid_score, c='r', s=20)
-    plt.suptitle('Centroid', fontsize=20)
+    scatter2 = plt.scatter(ls, medoid_score, c='r', s=20)
+    plt.suptitle('kMeans and kMedoids', fontsize=20)
     plt.xlabel('L', fontsize=16)
     plt.ylabel('Score', fontsize=16)
+    plt.legend((scatter, scatter2),
+               ('kMeans', 'kMedoids'),
+               scatterpoints=1,
+               loc='lower right',
+               ncol=3,
+               fontsize=14)
     plt.show()
 
     # part 3b: explore effect of lower-dimensional representations on clustering performance
