@@ -184,7 +184,8 @@ def kAverages(points, k, average, init='random', plot=False):
         for i_pt in init_pts:
             k_clusters.add(Cluster([i_pt]))
     elif init == 'cheat':
-        for m in cheat_init(points):
+        init_pts = cheat_init(points)
+        for m in init_pts:
             k_clusters.add(Cluster([m]))
 
     averages = average(k_clusters)
@@ -287,30 +288,30 @@ def main() :
     ### ========== TODO : START ========== ###
     # part 1: explore LFW data set
     X, y = util.get_lfw_data()
-    # n,d = X.shape
-    # avg_face = []
-    # for column_index in range(d):
-    #     col = X[:,column_index]
-    #     avg_face_attr = np.mean(col, axis=0)
-    #     avg_face.append(avg_face_attr)
+    n,d = X.shape
+    avg_face = []
+    for column_index in range(d):
+        col = X[:,column_index]
+        avg_face_attr = np.mean(col, axis=0)
+        avg_face.append(avg_face_attr)
 
-    # util.show_image(np.array(avg_face))
+    util.show_image(np.array(avg_face))
     ### ========== TODO : END ========== ###
     
     # 1b
-    # U, mu = util.PCA(X)
-    # n,d = U.shape
-    # plot_gallery([vec_to_image(U[:,i]) for i in xrange(12)])
-    # for column_index in range(d):
-    #     col = U[:,column_index]
-    #     util.show_image(util.vec_to_image(col))
+    U, mu = util.PCA(X)
+    n,d = U.shape
+    plot_gallery([vec_to_image(U[:,i]) for i in xrange(12)])
+    for column_index in range(d):
+        col = U[:,column_index]
+        util.show_image(util.vec_to_image(col))
     
     # 1c
-    # ls = [1, 10, 50, 100, 500, 1288]
-    # for l in ls:
-    #     Z, Ul = util.apply_PCA_from_Eig(X, U, l, mu)
-    #     X_rec = util.reconstruct_from_PCA(Z, Ul, mu)
-    #     plot_gallery(X_rec[:12])
+    ls = [1, 10, 50, 100, 500, 1288]
+    for l in ls:
+        Z, Ul = util.apply_PCA_from_Eig(X, U, l, mu)
+        X_rec = util.reconstruct_from_PCA(Z, Ul, mu)
+        plot_gallery(X_rec[:12])
     
 
     # test centroid
@@ -324,13 +325,13 @@ def main() :
 
     ### ========== TODO : START ========== ###
     # part 2d-2f: cluster toy dataset
-    # np.random.seed(1234)
-    # k = 3
-    # pts_per_cluster = 20
-    # for i in range(1):
-    #     points = generate_points_2d(pts_per_cluster)
-    #     k_clusters = kMeans(points, k, init="cheat", plot=True)
-    #     k_clusters = kMedoids(points, k, init="cheat", plot=True)
+    np.random.seed(1234)
+    k = 3
+    pts_per_cluster = 20
+    for i in range(1):
+        points = generate_points_2d(pts_per_cluster)
+        k_clusters = kMeans(points, k, init="cheat", plot=True)
+        k_clusters = kMedoids(points, k, init="cheat", plot=True)
     ### ========== TODO : END ========== ###
     
     ### ========== TODO : START ========== ###    
@@ -340,45 +341,49 @@ def main() :
     X1, y1 = util.limit_pics(X, y, [4, 6, 13, 16], 40)
     points = build_face_image_points(X1, y1)
 
-    # plot = {}
-    # for pt in points:
-    #     if pt.label not in plot:
-    #         plot[pt.label] = []
-    #     plot[pt.label].append(pt)
-    # clusters = ClusterSet()
-    # for l in plot:
-    #     clusters.add(Cluster(plot[l]))
-    # plot_clusters(clusters, 'orig', ClusterSet.centroids)
+    plot = {}
+    for pt in points:
+        if pt.label not in plot:
+            plot[pt.label] = []
+        plot[pt.label].append(pt)
+    clusters = ClusterSet()
+    for l in plot:
+        clusters.add(Cluster(plot[l]))
+    plot_clusters(clusters, 'orig', ClusterSet.centroids)
 
-    # Part 3a
-    # centroid_score = []
-    # medoid_score = []
-    # for i in range(10):
-    #     k_clusters = kMeans(points, k, init="random", plot=False)
-    #     centroid_score.append(k_clusters.score())
+    Part 3a
+    centroid_score = []
+    medoid_score = []
+    for i in range(10):
+        k_clusters = kMeans(points, k, init="random", plot=False)
+        centroid_score.append(k_clusters.score())
 
-    # centroid_mean = sum(centroid_score) / float(len(centroid_score))
-    # centroid_min = min(centroid_score)
-    # centroid_max = max(centroid_score)
-    # print('Centroid avg:', centroid_mean)
-    # print('Centroid min:', centroid_min)
-    # print('Centroid max:', centroid_max)
+    centroid_mean = sum(centroid_score) / float(len(centroid_score))
+    centroid_min = min(centroid_score)
+    centroid_max = max(centroid_score)
+    print('Centroid avg:', centroid_mean)
+    print('Centroid min:', centroid_min)
+    print('Centroid max:', centroid_max)
 
-    # medoid_score = []
-    # for i in range(10):
-    #     k_clusters = kMedoids(points, k, init="random", plot=False)
-    #     medoid_score.append(k_clusters.score())
+    medoid_score = []
+    for i in range(10):
+        k_clusters = kMedoids(points, k, init="random", plot=False)
+        medoid_score.append(k_clusters.score())
 
-    # centroid_mean = sum(medoid_score) / float(len(medoid_score))
-    # centroid_min = min(medoid_score)
-    # centroid_max = max(medoid_score)
-    # print('Medoid avg:', centroid_mean)
-    # print('Medoid min:', centroid_min)
-    # print('Medoid max:', centroid_max)
+    centroid_mean = sum(medoid_score) / float(len(medoid_score))
+    centroid_min = min(medoid_score)
+    centroid_max = max(medoid_score)
+    print('Medoid avg:', centroid_mean)
+    print('Medoid min:', centroid_min)
+    print('Medoid max:', centroid_max)
 
-    # PART 3b
+
+
+    # part 3b: explore effect of lower-dimensional representations on clustering performance
+    np.random.seed(1234)
+
+    U, mu = util.PCA(X)
     X1, y1 = util.limit_pics(X, y, [4, 13], 40)
-    U, mu = util.PCA(X1)
     k = 2
     ls = range(42)[1::2]
 
@@ -387,7 +392,7 @@ def main() :
 
     for l in ls:
         Z, Ul = util.apply_PCA_from_Eig(X1, U, l, mu)
-        X_rec = util.reconstruct_from_PCA(Z, Ul, mu)
+        # X_rec = util.reconstruct_from_PCA(Z, Ul, mu)
         points = build_face_image_points(Z, y1)
         # plot_gallery(X_rec[:12])
 
@@ -408,12 +413,35 @@ def main() :
                ncol=3,
                fontsize=14)
     plt.show()
-
-    # part 3b: explore effect of lower-dimensional representations on clustering performance
-    np.random.seed(1234)
     
     # part 3c: determine ``most discriminative'' and ``least discriminative'' pairs of images
     np.random.seed(1234)
+  
+    totalPeople = 19
+    best_score = 0
+    worst_score = float("inf")
+    best_pair = None
+    worst_pair = None
+    for p1 in xrange(totalPeople):
+        for p2 in xrange(p1+1, totalPeople):
+            X3, y3 = util.limit_pics(X, y, [p1, p2], 40)
+            points = build_face_image_points(X3, y3)
+            clusters = kAverages(points, 2, ClusterSet.medoids, init='cheat', plot=False)
+            score = clusters.score()
+            if score > best_score:
+                best_score = score
+                best_pair = (p1,p2)
+            if score < worst_score:
+                worst_score = score
+                worst_pair = (p1,p2)
+    
+    print(best_pair)
+    print(best_score)
+    plot_representative_images(X,y, best_pair, title="Most Similar Face")
+
+    print(worst_pair)
+    print(worst_score)
+    plot_representative_images(X,y, worst_pair, title="Least Similar Face")
     
     ### ========== TODO : END ========== ###
 
